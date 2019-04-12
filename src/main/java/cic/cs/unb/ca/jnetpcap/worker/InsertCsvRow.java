@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +42,9 @@ public class InsertCsvRow implements Runnable {
     }
 
     public static void insert(String header,List<String>  rows,String savepath, String filename) {
+    	insert(header, rows, savepath, filename, -1);
+    }
+    public static void insert(String header,List<String>  rows,String savepath, String filename, Integer fileTimeout) {
         if (savepath == null || filename == null || rows == null || rows.size() <= 0) {
             String ex = String.format("savepath=%s,filename=%s", savepath, filename);
             throw new IllegalArgumentException(ex);
@@ -62,8 +66,26 @@ public class InsertCsvRow implements Runnable {
 
         try {
             if (file.exists()) {
-                output = new FileOutputStream(file, true);
+            	// check if there is a file timeout, end if outdated
+            	if (fileTimeout > 0) {
+            		long timeDiff = new Date().getTime() - file.lastModified();
+            		if (timeDiff > fileTimeout*1000) {
+            			logger.info("file is outdated, delete it :"+savepath+filename);
+            		    file.delete();
+                        if (file.createNewFile()) {
+                            output = new FileOutputStream(file);
+                        }
+                        if (header != null) {
+                            output.write((header+LINE_SEP).getBytes());
+                        }
+            		}else {
+                		output = new FileOutputStream(file, true);            			
+            		}
+            	}else {
+            		output = new FileOutputStream(file, true);
+            	}
             }else{
+    			logger.info("create new output file : "+savepath+filename);
                 if (file.createNewFile()) {
                     output = new FileOutputStream(file);
                 }
