@@ -1235,6 +1235,297 @@ public class BasicFlow {
     	
     	return dump.toString();
     }
+
+    public String dumpFlowBasedFeaturesJson() {
+    	
+    	StringBuilder dump = new StringBuilder();
+    	
+    	dump.append("{\"").append(FlowFeature.values()[0].getAbbr()).append("\":");
+    	dump.append("\"").append(flowId).append("\"").append(separator);                						//1
+    	dump.append("\"").append(FlowFeature.values()[1].getAbbr()).append("\":");
+    	dump.append("\"").append(FormatUtils.ip(src)).append("\"").append(separator);   						//2
+    	dump.append("\"").append(FlowFeature.values()[2].getAbbr()).append("\":");
+    	dump.append("\"").append(getSrcPort()).append("\"").append(separator);          						//3
+    	dump.append("\"").append(FlowFeature.values()[3].getAbbr()).append("\":");
+    	dump.append("\"").append(FormatUtils.ip(dst)).append("\"").append(separator);  						//4
+    	dump.append("\"").append(FlowFeature.values()[4].getAbbr()).append("\":");
+    	dump.append("\"").append(getDstPort()).append("\"").append(separator);          						//5
+    	dump.append("\"").append(FlowFeature.values()[5].getAbbr()).append("\":");
+    	dump.append("\"").append(getProtocol()).append("\"").append(separator);         						//6 
+    	
+    	String starttime = DateFormatter.convertMilliseconds2String(flowStartTime/1000L, "dd/MM/yyyy hh:mm:ss a");
+    	dump.append("\"").append(FlowFeature.values()[6].getAbbr()).append("\":");
+    	dump.append("\"").append(starttime).append("\"").append(separator);									//7
+    	
+    	long flowDuration = flowLastSeen - flowStartTime;
+    	dump.append("\"").append(FlowFeature.values()[7].getAbbr()).append("\":");
+    	dump.append("\"").append(flowDuration).append("\"").append(separator);								//8
+    	
+    	dump.append("\"").append(FlowFeature.values()[8].getAbbr()).append("\":");
+    	dump.append("\"").append(fwdPktStats.getN()).append("\"").append(separator);							//9
+    	dump.append("\"").append(FlowFeature.values()[9].getAbbr()).append("\":");
+    	dump.append("\"").append(bwdPktStats.getN()).append("\"").append(separator);							//10	
+    	dump.append("\"").append(FlowFeature.values()[10].getAbbr()).append("\":");
+    	dump.append("\"").append(fwdPktStats.getSum()).append("\"").append(separator);						//11
+    	dump.append("\"").append(FlowFeature.values()[11].getAbbr()).append("\":");
+    	dump.append("\"").append(bwdPktStats.getSum()).append("\"").append(separator);						//12
+    	
+    	if(fwdPktStats.getN() > 0L) {
+        	dump.append("\"").append(FlowFeature.values()[12].getAbbr()).append("\":");
+    		dump.append("\"").append(fwdPktStats.getMax()).append("\"").append(separator);					//13
+        	dump.append("\"").append(FlowFeature.values()[13].getAbbr()).append("\":");
+    		dump.append("\"").append(fwdPktStats.getMin()).append("\"").append(separator);					//14
+        	dump.append("\"").append(FlowFeature.values()[14].getAbbr()).append("\":");
+    		dump.append("\"").append(fwdPktStats.getMean()).append("\"").append(separator);					//15
+        	dump.append("\"").append(FlowFeature.values()[15].getAbbr()).append("\":");
+    		dump.append("\"").append(fwdPktStats.getStandardDeviation()).append("\"").append(separator);		//16
+    	}else {
+        	dump.append("\"").append(FlowFeature.values()[12].getAbbr()).append("\":");
+    		dump.append("\"").append(0).append("\"").append(separator);
+        	dump.append("\"").append(FlowFeature.values()[13].getAbbr()).append("\":");
+    		dump.append("\"").append(0).append("\"").append(separator);
+        	dump.append("\"").append(FlowFeature.values()[14].getAbbr()).append("\":");
+    		dump.append("\"").append(0).append("\"").append(separator);
+        	dump.append("\"").append(FlowFeature.values()[15].getAbbr()).append("\":");
+    		dump.append("\"").append(0).append("\"").append(separator);
+    	}
+    	
+    	if(bwdPktStats.getN() > 0L) {
+        	dump.append("\"").append(FlowFeature.values()[16].getAbbr()).append("\":");
+    		dump.append("\"").append(bwdPktStats.getMax()).append("\"").append(separator);					//17
+        	dump.append("\"").append(FlowFeature.values()[17].getAbbr()).append("\":");
+    		dump.append("\"").append(bwdPktStats.getMin()).append("\"").append(separator);					//18
+        	dump.append("\"").append(FlowFeature.values()[18].getAbbr()).append("\":");
+    		dump.append("\"").append(bwdPktStats.getMean()).append("\"").append(separator);					//19
+        	dump.append("\"").append(FlowFeature.values()[19].getAbbr()).append("\":");
+    		dump.append("\"").append(bwdPktStats.getStandardDeviation()).append("\"").append(separator);		//20
+		}else{
+	    	dump.append("\"").append(FlowFeature.values()[16].getAbbr()).append("\":");
+    		dump.append("\"").append(0).append("\"").append(separator);
+        	dump.append("\"").append(FlowFeature.values()[17].getAbbr()).append("\":");
+    		dump.append("\"").append(0).append("\"").append(separator);
+        	dump.append("\"").append(FlowFeature.values()[18].getAbbr()).append("\":");
+    		dump.append("\"").append(0).append("\"").append(separator);
+        	dump.append("\"").append(FlowFeature.values()[19].getAbbr()).append("\":");
+    		dump.append("\"").append(0).append("\"").append(separator);
+		}
+    	dump.append("\"").append(FlowFeature.values()[20].getAbbr()).append("\":");
+    	dump.append("\"").append(((double)(forwardBytes+backwardBytes))/((double)flowDuration/1000000L)).append("\"").append(separator);//21
+    	dump.append("\"").append(FlowFeature.values()[21].getAbbr()).append("\":");
+    	dump.append("\"").append(((double)packetCount())/((double)flowDuration/1000000L)).append("\"").append(separator);//22
+    	dump.append("\"").append(FlowFeature.values()[22].getAbbr()).append("\":");
+    	dump.append("\"").append(flowIAT.getMean()).append("\"").append(separator);							//23
+    	dump.append("\"").append(FlowFeature.values()[23].getAbbr()).append("\":");
+    	dump.append("\"").append(flowIAT.getStandardDeviation()).append("\"").append(separator);				//24
+    	dump.append("\"").append(FlowFeature.values()[24].getAbbr()).append("\":");
+    	dump.append("\"").append(flowIAT.getMax()).append("\"").append(separator);							//25
+    	dump.append("\"").append(FlowFeature.values()[25].getAbbr()).append("\":");
+    	dump.append("\"").append(flowIAT.getMin()).append("\"").append(separator);							//26
+    	
+    	if(this.forward.size()>1){
+        	dump.append("\"").append(FlowFeature.values()[26].getAbbr()).append("\":");
+        	dump.append("\"").append(forwardIAT.getSum()).append("\"").append(separator);						//27
+        	dump.append("\"").append(FlowFeature.values()[27].getAbbr()).append("\":");
+        	dump.append("\"").append(forwardIAT.getMean()).append("\"").append(separator);					//28
+        	dump.append("\"").append(FlowFeature.values()[28].getAbbr()).append("\":");
+        	dump.append("\"").append(forwardIAT.getStandardDeviation()).append("\"").append(separator);		//29	
+        	dump.append("\"").append(FlowFeature.values()[29].getAbbr()).append("\":");
+        	dump.append("\"").append(forwardIAT.getMax()).append("\"").append(separator);						//30
+        	dump.append("\"").append(FlowFeature.values()[30].getAbbr()).append("\":");
+        	dump.append("\"").append(forwardIAT.getMin()).append("\"").append(separator);						//31
+        	
+    	}else{
+        	dump.append("\"").append(FlowFeature.values()[26].getAbbr()).append("\":");
+    		dump.append("\"").append(0).append("\"").append(separator);
+        	dump.append("\"").append(FlowFeature.values()[27].getAbbr()).append("\":");
+    		dump.append("\"").append(0).append("\"").append(separator);
+        	dump.append(FlowFeature.values()[28].getAbbr()).append("\":");
+    		dump.append("\"").append(0).append("\"").append(separator);
+        	dump.append("\"").append(FlowFeature.values()[29].getAbbr()).append("\":");
+    		dump.append("\"").append(0).append("\"").append(separator);
+        	dump.append("\"").append(FlowFeature.values()[30].getAbbr()).append("\":");
+    		dump.append("\"").append(0).append("\"").append(separator);
+    	}
+    	if(this.backward.size()>1){
+        	dump.append("\"").append(FlowFeature.values()[31].getAbbr()).append("\":");
+        	dump.append("\"").append(backwardIAT.getSum()).append("\"").append(separator);					//32
+        	dump.append("\"").append(FlowFeature.values()[32].getAbbr()).append("\":");
+        	dump.append("\"").append(backwardIAT.getMean()).append("\"").append(separator);					//33
+        	dump.append("\"").append(FlowFeature.values()[33].getAbbr()).append("\":");
+        	dump.append("\"").append(backwardIAT.getStandardDeviation()).append("\"").append(separator);		//34	
+        	dump.append("\"").append(FlowFeature.values()[34].getAbbr()).append("\":");
+        	dump.append("\"").append(backwardIAT.getMax()).append("\"").append(separator);					//35
+        	dump.append("\"").append(FlowFeature.values()[35].getAbbr()).append("\":");
+        	dump.append("\"").append(backwardIAT.getMin()).append("\"").append(separator);					//36
+    	}else{
+        	dump.append("\"").append(FlowFeature.values()[31].getAbbr()).append("\":");
+    		dump.append("\"").append(0).append("\"").append(separator);
+        	dump.append("\"").append(FlowFeature.values()[32].getAbbr()).append("\":");
+    		dump.append("\"").append(0).append("\"").append(separator);
+        	dump.append("\"").append(FlowFeature.values()[33].getAbbr()).append("\":");
+    		dump.append("\"").append(0).append("\"").append(separator);
+        	dump.append("\"").append(FlowFeature.values()[34].getAbbr()).append("\":");
+    		dump.append("\"").append(0).append("\"").append(separator);
+        	dump.append("\"").append(FlowFeature.values()[35].getAbbr()).append("\":");
+    		dump.append("\"").append(0).append("\"").append(separator);
+    	}
+    	
+    	dump.append("\"").append(FlowFeature.values()[36].getAbbr()).append("\":");
+		dump.append("\"").append(fPSH_cnt).append("\"").append(separator);									//37
+    	dump.append("\"").append(FlowFeature.values()[37].getAbbr()).append("\":");
+		dump.append("\"").append(bPSH_cnt).append("\"").append(separator);									//38
+    	dump.append("\"").append(FlowFeature.values()[38].getAbbr()).append("\":");
+		dump.append("\"").append(fURG_cnt).append("\"").append(separator);									//39
+    	dump.append("\"").append(FlowFeature.values()[39].getAbbr()).append("\":");
+		dump.append("\"").append(bURG_cnt).append("\"").append(separator);									//40
+
+    	dump.append("\"").append(FlowFeature.values()[40].getAbbr()).append("\":");
+		dump.append("\"").append(fHeaderBytes).append("\"").append(separator);								//41
+    	dump.append("\"").append(FlowFeature.values()[41].getAbbr()).append("\":");
+		dump.append("\"").append(bHeaderBytes).append("\"").append(separator);								//42
+    	dump.append("\"").append(FlowFeature.values()[42].getAbbr()).append("\":");
+		dump.append("\"").append(getfPktsPerSecond()).append("\"").append(separator);							//43
+    	dump.append("\"").append(FlowFeature.values()[43].getAbbr()).append("\":");
+		dump.append("\"").append(getbPktsPerSecond()).append("\"").append(separator);							//44
+		
+		
+		if(this.forward.size() > 0 || this.backward.size() > 0){
+	    	dump.append("\"").append(FlowFeature.values()[44].getAbbr()).append("\":");
+			dump.append("\"").append(flowLengthStats.getMin()).append("\"").append(separator);				//45
+	    	dump.append("\"").append(FlowFeature.values()[45].getAbbr()).append("\":");
+			dump.append("\"").append(flowLengthStats.getMax()).append("\"").append(separator);				//46
+	    	dump.append("\"").append(FlowFeature.values()[46].getAbbr()).append("\":");
+			dump.append("\"").append(flowLengthStats.getMean()).append("\"").append(separator);				//47
+	    	dump.append("\"").append(FlowFeature.values()[47].getAbbr()).append("\":");
+			dump.append("\"").append(flowLengthStats.getStandardDeviation()).append("\"").append(separator);	//48
+	    	dump.append("\"").append(FlowFeature.values()[48].getAbbr()).append("\":");
+			dump.append("\"").append(flowLengthStats.getVariance()).append("\"").append(separator);			//49
+		}else{//seem to less one
+	    	dump.append("\"").append(FlowFeature.values()[44].getAbbr()).append("\":");
+			dump.append("\"").append(0).append("\"").append(separator);
+	    	dump.append("\"").append(FlowFeature.values()[45].getAbbr()).append("\":");
+    		dump.append("\"").append(0).append("\"").append(separator);
+        	dump.append("\"").append(FlowFeature.values()[46].getAbbr()).append("\":");
+    		dump.append("\"").append(0).append("\"").append(separator);
+        	dump.append("\"").append(FlowFeature.values()[47].getAbbr()).append("\":");
+    		dump.append("\"").append(0).append("\"").append(separator);
+        	dump.append("\"").append(FlowFeature.values()[48].getAbbr()).append("\":");
+    		dump.append("\"").append(0).append("\"").append(separator);
+		}
+		
+		/*for(MutableInt v:flagCounts.values()) {
+			dump.append(v).append("\"").append(separator);
+		}
+		for(String key: flagCounts.keySet()){
+			dump.append(flagCounts.get(key).value).append("\"").append(separator);				//50,51,52,53,54,55,56,57
+		} */
+    	dump.append("\"").append(FlowFeature.values()[49].getAbbr()).append("\":");
+		dump.append("\"").append(flagCounts.get("FIN").value).append("\"").append(separator);                 //50
+    	dump.append("\"").append(FlowFeature.values()[50].getAbbr()).append("\":");
+		dump.append("\"").append(flagCounts.get("SYN").value).append("\"").append(separator);                 //51
+    	dump.append("\"").append(FlowFeature.values()[51].getAbbr()).append("\":");
+		dump.append("\"").append(flagCounts.get("RST").value).append("\"").append(separator);                  //52
+    	dump.append("\"").append(FlowFeature.values()[52].getAbbr()).append("\":");
+		dump.append("\"").append(flagCounts.get("PSH").value).append("\"").append(separator);                  //53
+    	dump.append("\"").append(FlowFeature.values()[53].getAbbr()).append("\":");
+		dump.append("\"").append(flagCounts.get("ACK").value).append("\"").append(separator);                  //54
+    	dump.append("\"").append(FlowFeature.values()[54].getAbbr()).append("\":");
+		dump.append("\"").append(flagCounts.get("URG").value).append("\"").append(separator);                  //55
+    	dump.append("\"").append(FlowFeature.values()[55].getAbbr()).append("\":");
+		dump.append("\"").append(flagCounts.get("CWR").value).append("\"").append(separator);                  //56
+    	dump.append("\"").append(FlowFeature.values()[56].getAbbr()).append("\":");
+		dump.append("\"").append(flagCounts.get("ECE").value).append("\"").append(separator);                  //57
+		
+    	dump.append("\"").append(FlowFeature.values()[57].getAbbr()).append("\":");
+		dump.append("\"").append(getDownUpRatio()).append("\"").append(separator);							//58
+    	dump.append("\"").append(FlowFeature.values()[58].getAbbr()).append("\":");
+		dump.append("\"").append(getAvgPacketSize()).append("\"").append(separator);							//59
+    	dump.append("\"").append(FlowFeature.values()[59].getAbbr()).append("\":");
+		dump.append("\"").append(fAvgSegmentSize()).append("\"").append(separator);							//60
+    	dump.append("\"").append(FlowFeature.values()[60].getAbbr()).append("\":");
+		dump.append("\"").append(bAvgSegmentSize()).append("\"").append(separator);							//61
+    	//dump.append("\"").append(FlowFeature.values()[61].getAbbr()).append("\":");
+		//dump.append(fHeaderBytes).append("\"").append(separator);								//62 dupicate with 41
+		
+    	dump.append("\"").append(FlowFeature.values()[62].getAbbr()).append("\":");
+		dump.append("\"").append(fAvgBytesPerBulk()).append("\"").append(separator);							//63	
+    	dump.append("\"").append(FlowFeature.values()[63].getAbbr()).append("\":");
+		dump.append("\"").append(fAvgPacketsPerBulk()).append("\"").append(separator);						//64
+    	dump.append("\"").append(FlowFeature.values()[64].getAbbr()).append("\":");
+		dump.append("\"").append(fAvgBulkRate()).append("\"").append(separator);								//65
+    	dump.append("\"").append(FlowFeature.values()[65].getAbbr()).append("\":");
+		dump.append("\"").append(fAvgBytesPerBulk()).append("\"").append(separator);							//66
+    	dump.append("\"").append(FlowFeature.values()[66].getAbbr()).append("\":");
+		dump.append("\"").append(bAvgPacketsPerBulk()).append("\"").append(separator);						//67
+    	dump.append("\"").append(FlowFeature.values()[67].getAbbr()).append("\":");
+		dump.append("\"").append(bAvgBulkRate()).append("\"").append(separator);								//68
+    	
+    	dump.append("\"").append(FlowFeature.values()[68].getAbbr()).append("\":");
+		dump.append("\"").append(getSflow_fpackets()).append("\"").append(separator);							//69
+    	dump.append("\"").append(FlowFeature.values()[69].getAbbr()).append("\":");
+		dump.append("\"").append(getSflow_fbytes()).append("\"").append(separator);							//70
+    	dump.append("\"").append(FlowFeature.values()[70].getAbbr()).append("\":");
+		dump.append("\"").append(getSflow_bpackets()).append("\"").append(separator);							//71
+    	dump.append("\"").append(FlowFeature.values()[71].getAbbr()).append("\":");
+		dump.append("\"").append(getSflow_bbytes()).append("\"").append(separator);							//72
+			
+    	dump.append("\"").append(FlowFeature.values()[72].getAbbr()).append("\":");
+    	dump.append("\"").append(Init_Win_bytes_forward).append("\"").append(separator);						//73
+    	dump.append("\"").append(FlowFeature.values()[73].getAbbr()).append("\":");
+    	dump.append("\"").append(Init_Win_bytes_backward).append("\"").append(separator);						//74
+    	dump.append("\"").append(FlowFeature.values()[74].getAbbr()).append("\":");
+    	dump.append("\"").append(Act_data_pkt_forward).append("\"").append(separator);						//75
+    	dump.append("\"").append(FlowFeature.values()[75].getAbbr()).append("\":");
+    	dump.append("\"").append(min_seg_size_forward).append("\"").append(separator);						//76
+    	
+    	
+    	if(this.flowActive.getN()>0){
+        	dump.append("\"").append(FlowFeature.values()[76].getAbbr()).append("\":");
+        	dump.append("\"").append(flowActive.getMean()).append("\"").append(separator);					//77
+        	dump.append("\"").append(FlowFeature.values()[77].getAbbr()).append("\":");
+        	dump.append("\"").append(flowActive.getStandardDeviation()).append("\"").append(separator);		//78
+        	dump.append("\"").append(FlowFeature.values()[78].getAbbr()).append("\":");
+        	dump.append("\"").append(flowActive.getMax()).append("\"").append(separator);						//79
+        	dump.append("\"").append(FlowFeature.values()[79].getAbbr()).append("\":");
+        	dump.append("\"").append(flowActive.getMin()).append("\"").append(separator);						//80
+    	}else{
+        	dump.append("\"").append(FlowFeature.values()[76].getAbbr()).append("\":");
+			dump.append("\"").append(0).append("\"").append(separator);
+	    	dump.append("\"").append(FlowFeature.values()[77].getAbbr()).append("\":");
+    		dump.append("\"").append(0).append("\"").append(separator);
+        	dump.append("\"").append(FlowFeature.values()[78].getAbbr()).append("\":");
+    		dump.append("\"").append(0).append("\"").append(separator);
+        	dump.append("\"").append(FlowFeature.values()[79].getAbbr()).append("\":");
+    		dump.append("\"").append(0).append("\"").append(separator);
+    	}    	
+    	
+    	if(this.flowIdle.getN()>0){
+        	dump.append("\"").append(FlowFeature.values()[80].getAbbr()).append("\":");
+	    	dump.append("\"").append(flowIdle.getMean()).append("\"").append(separator);						//81
+	    	dump.append("\"").append(FlowFeature.values()[81].getAbbr()).append("\":");
+	    	dump.append("\"").append(flowIdle.getStandardDeviation()).append("\"").append(separator);			//82
+	    	dump.append("\"").append(FlowFeature.values()[82].getAbbr()).append("\":");
+	    	dump.append("\"").append(flowIdle.getMax()).append("\"").append(separator);						//83
+	    	dump.append("\"").append(FlowFeature.values()[83].getAbbr()).append("\":");
+	    	dump.append("\"").append(flowIdle.getMin()).append("\"").append(separator);						//84	
+    	}else{
+        	dump.append("\"").append(FlowFeature.values()[80].getAbbr()).append("\":");
+			dump.append("\"").append(0).append("\"").append(separator);
+	    	dump.append("\"").append(FlowFeature.values()[81].getAbbr()).append("\":");
+    		dump.append("\"").append(0).append("\"").append(separator);
+        	dump.append("\"").append(FlowFeature.values()[82].getAbbr()).append("\":");
+    		dump.append("\"").append(0).append("\"").append(separator);
+        	dump.append("\"").append(FlowFeature.values()[83].getAbbr()).append("\":");
+    		dump.append("\"").append(0).append("\"").append(separator);
+    	}
+
+        dump.append("\"Label\":\"").append(getLabel());
+        dump.append("\"}");
+
+    	
+    	return dump.toString();
+    }
+
 }
 class MutableInt {
 	int value = 0; // note that we start at 1 since we're counting
