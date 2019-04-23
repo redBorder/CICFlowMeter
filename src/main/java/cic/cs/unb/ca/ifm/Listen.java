@@ -208,7 +208,10 @@ public class Listen {
 	    	CloseableHttpClient httpClient = HttpClientBuilder.create().build();
 
 	    	try {
-	    	    HttpPost request = new HttpPost(destinationUrl);
+	    		long epochtime = System.currentTimeMillis()/1000;
+	    		String url = destinationUrl+"/"+Long.toString(epochtime);
+	    		logger.info("url : "+url);
+	    	    HttpPost request = new HttpPost(url);
 	    	    
 	    	    StringEntity params = new StringEntity(json, ContentType.APPLICATION_FORM_URLENCODED);
 	    	    request.addHeader("content-type", "application/json");
