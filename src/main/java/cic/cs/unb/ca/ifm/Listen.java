@@ -199,7 +199,7 @@ public class Listen {
 	
 	        logger.info("insert flow : " + fileName);
             if (outPath != null) InsertCsvRow.insert(FlowFeature.getHeader(),flowStringList,outPath,fileName, fileTimeout);
-	        if (destinationUrl != null) sendFlow(flow.dumpFlowBasedFeaturesJson());
+	        if (destinationUrl != null) sendFlow("["+flow.dumpFlowBasedFeaturesJson()+"]");
 		}
 	    
 	    private void sendFlow(String json) throws IOException {
