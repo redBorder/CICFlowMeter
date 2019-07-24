@@ -25,7 +25,7 @@ import org.apache.commons.cli.*;
 public class Listen {
 
     public static final Logger logger = LoggerFactory.getLogger(Listen.class);
-    
+
     public static void main(String[] args) {
 
         String outPath;
@@ -33,7 +33,7 @@ public class Listen {
         Integer fileTimeout;
         Integer maxCsvFiles;
         String destinationUrl;
-        
+
         Options options = new Options();
         Option help = new Option("h", "help", true, "show this help");
         help.setRequired(false);
@@ -53,7 +53,7 @@ public class Listen {
         Option destinationurl = new Option("d", "destinationUrl", true, "destination url to send the flows to");
         output.setRequired(false);
         options.addOption(destinationurl);
-        
+
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
         CommandLine cmd;
@@ -61,50 +61,50 @@ public class Listen {
         outPath=null;
         destinationUrl=null;
         interfaceName=null;
-        
+
         // by default we write in one csv file, unlimited time
         fileTimeout=-1;
-        
+
         // by default we will keep track of 10 csv files
         maxCsvFiles=10;
-        		
+
         try {
             cmd = parser.parse(options, args);
-            
+
             if (cmd.hasOption("h")) {
                 formatter.printHelp("listen", options);
                 System.exit(0);
             }
-            
+
             interfaceName = cmd.getOptionValue("interface");
             if (interfaceName == null) {
                 formatter.printHelp("listen", options);
-                System.exit(0);            	
+                System.exit(0);
             }
 
             if (cmd.hasOption("o")) {
                 outPath = cmd.getOptionValue("output");
-            	
+
                 if (cmd.hasOption("t")) {
                 	fileTimeout=Integer.parseInt(cmd.getOptionValue("filetimeout"));
                 	if (!(fileTimeout > 0)) {
                     	logger.info("Filetimeout should be bigger than 0");
                 		System.exit(1);
                 	}
-                }            	
+                }
                 if (cmd.hasOption("m")) {
                 	maxCsvFiles=Integer.parseInt(cmd.getOptionValue("maxcsvfiles"));
                 	if (!(maxCsvFiles > 0)) {
                     	logger.info("Max Csv files should be bigger than 0");
                 		System.exit(1);
                 	}
-                }            	
+                }
             }
-                        
+
             if (cmd.hasOption("t")) {
                 outPath = cmd.getOptionValue("output");
             }
-            
+
             if (cmd.hasOption("d")) {
                 destinationUrl = cmd.getOptionValue("destinationUrl");
             }
@@ -131,10 +131,10 @@ public class Listen {
         flowGen.addFlowListener(new FlowListener(outPath, interfaceName, fileTimeout, maxCsvFiles, destinationUrl));
 
     }
-    
+
     static class FlowListener implements FlowGenListener {
         private TrafficFlowWorker mWorker;
-        
+
         private String outPath;
         private String ifName;
         private Integer fileTimeout;
@@ -151,7 +151,7 @@ public class Listen {
             this.loop = loop;
             this.count = 0;
             this.currentTime=System.currentTimeMillis();
-            
+
             // start the worker to listen to the interface
             start();
         }
@@ -160,14 +160,14 @@ public class Listen {
         public void onFlowGenerated(BasicFlow flow) {
             // we will keep listening forever, we do not come here
         }
-    
-    
+
+
 	    private void start() {
-		
+
 	        if (mWorker != null && !mWorker.isCancelled()) {
 	            return;
 	        }
-	
+
 	        mWorker = new TrafficFlowWorker(ifName);
 	        mWorker.addPropertyChangeListener(event -> {
 	            if (TrafficFlowWorker.PROPERTY_FLOW.equalsIgnoreCase(event.getPropertyName())) {
@@ -179,32 +179,35 @@ public class Listen {
 	    	        String filename = "data_"+Integer.toString(count) + FlowMgr.FLOW_SUFFIX;
 
 	            	try {
-						insertFlow((BasicFlow) event.getNewValue(), filename);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+      						insertFlow((BasicFlow) event.getNewValue(), filename);
+      					} catch (IOException e) {
+      						e.printStackTrace();
+      					}
 	            }
 	        });
 	        mWorker.execute();
 	        logger.info("waiting...");
 	        while (true) {
+             try{Thread.sleep(60000);}catch(InterruptedException ie){}
+             logger.info("i am in a while loop");
 	        	 // waiting for incoming flow data
 	        }
 	    }
-	
+
 	    private void insertFlow(BasicFlow flow, String fileName) throws IOException {
 	        List<String> flowStringList = new ArrayList<>();
 	        String flowDump = flow.dumpFlowBasedFeaturesEx();
 	        flowStringList.add(flowDump);
-	
+
 	        logger.info("insert flow : " + fileName);
-            if (outPath != null) InsertCsvRow.insert(FlowFeature.getHeader(),flowStringList,outPath,fileName, fileTimeout);
+          logger.info("post flow : " + flow.dumpFlowBasedFeaturesJson());
+          if (outPath != null) InsertCsvRow.insert(FlowFeature.getHeader(),flowStringList,outPath,fileName, fileTimeout);
 	        if (destinationUrl != null) sendFlow("["+flow.dumpFlowBasedFeaturesJson()+"]");
-		}
-	    
+		  }
+
 	    private void sendFlow(String json) throws IOException {
 
-	        logger.info("post flow : " + json);
+	      logger.info("post flow : " + json);
 	    	CloseableHttpClient httpClient = HttpClientBuilder.create().build();
 
 	    	try {
@@ -212,12 +215,12 @@ public class Listen {
 	    		String url = destinationUrl+"/"+Long.toString(epochtime);
 	    		logger.info("url : "+url);
 	    	    HttpPost request = new HttpPost(url);
-	    	    
+
 	    	    StringEntity params = new StringEntity(json, ContentType.APPLICATION_FORM_URLENCODED);
 	    	    request.addHeader("content-type", "application/json");
 	    	    request.setEntity(params);
-	    	    httpClient.execute(request);    	    
-	    	    
+	    	    httpClient.execute(request);
+
 	    	// handle response here...
 	    	} catch (Exception ex) {
 	    	    logger.info("exeption : "+ex.toString());
